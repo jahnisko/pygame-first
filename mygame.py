@@ -69,10 +69,22 @@ class Cloud(pygame.sprite.Sprite):
                 random.randint(0, SCREEN_HEIGHT),
             )
         )
+
     def update(self):
         self.rect.move_ip(-5, 0)
         if self.rect.right < 0:
              self.kill()
+
+
+class Text(pygame.sprite.Sprite):
+    def __init__(self, text):
+        super(Text, self).__init__()
+        self.font = pygame.font.SysFont("Arial", 13)
+        self.surf = self.font.render(text, True, (0, 0, 120))
+        self.rect = self.surf.get_rect()
+
+    def update(self):
+        self.surf = self.font.render(text, True, (0, 0, 120))
 
 pygame.mixer.init()
 
@@ -81,7 +93,6 @@ pygame.init()
 clock = pygame.time.Clock()
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-
 ADDENEMY = pygame.USEREVENT + 1
 pygame.time.set_timer(ADDENEMY, 250)
 ADDCLOUD = pygame.USEREVENT + 2
@@ -94,6 +105,7 @@ enemies = pygame.sprite.Group()
 clouds = pygame.sprite.Group()
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
+texts = pygame.sprite.Group()
 
 pygame.mixer.music.load("sound/Sky_dodge_theme.ogg")
 pygame.mixer.music.play(loops=-1) # Stálé opakování písně, nepřestane hrát
@@ -108,7 +120,8 @@ move_down_sound.set_volume(0.8)
 collision_sound.set_volume(1.0)
 
 running = True
-
+# Deklarace proměnné score pro načtení skóre
+score = 0
 while running:
     for event in pygame.event.get():
         if event.type == KEYDOWN:
@@ -131,18 +144,24 @@ while running:
     clouds.update()
     screen.fill((13, 200, 250))
 
+    # Nastavení písma pro skóre po vytištění na obrazovku
+    myfont = pygame.font.SysFont("monospace", 16)
+
+    # Renderování nápisu pro skóre o černé barvě
+    scoretext = myfont.render("Score {0}".format(score), 1, (0, 0, 0))
+
+    # Vypsání skóre do levého horního rohu na obrazovku
+    screen.blit(scoretext, (5, 10))
+
+
     # Pro každou enititu v all_sprites
     for entity in all_sprites:
         screen.blit(entity.surf, entity.rect)
-
     if pygame.sprite.spritecollideany(player, enemies):
-        player.kill()
-        move_up_sound.stop()
-        move_down_sound.stop()
-        pygame.time.delay(50)
-        collision_sound.play()
-        pygame.time.delay(500)
-        running = False
+        # Pokud narazí do bomby, přičte se skóre
+        # Je to sice nereálné, ale jedná se pouze o demonstrování přičítání skóre, jak to funguje
+        score += 1
+
     # Vykreslení hráče
     screen.blit(player.surf, player.rect)
 
